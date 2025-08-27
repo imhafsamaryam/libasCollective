@@ -31,7 +31,6 @@ class AuthProvider with ChangeNotifier {
     });
   }
 
-  // Changed from private to public
   Future<void> loadUserData(String uid) async {
     try {
       _userData = await _firestoreService.getUser(uid);
