@@ -15,6 +15,7 @@ class AppConstants {
   static const String profileUpdateSuccess = 'Profile updated successfully';
 
   //Stripe key
-  static const stripePublishableKey = 'pk_test_placeholder';
-  static const stripeSecretKey = 'sk_test_placeholder'; // placeholder
+  static final String stripePublishableKey =
+      dotenv.env['STRIPE_PUBLISHABLE_KEY'] ?? '';
+  static final String stripeSecretKey = dotenv.env['STRIPE_SECRET_KEY'] ?? '';
 }
