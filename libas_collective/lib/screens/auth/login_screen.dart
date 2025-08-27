@@ -1,5 +1,8 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
+import 'package:store_app/main.dart';
 import 'package:store_app/providers/auth_provider.dart';
 import 'package:store_app/utils/validators.dart';
 import 'register_screen.dart';
@@ -14,6 +17,33 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+
+  void _initFirebaseMessaging() async {
+    NotificationSettings settings =
+        await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    print('User granted permission: ${settings.authorizationStatus}');
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (message.notification != null) {
+        showNotification(
+          message.notification!.title,
+          message.notification!.body,
+        );
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    _initFirebaseMessaging();
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

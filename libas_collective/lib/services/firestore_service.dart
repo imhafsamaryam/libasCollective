@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:store_app/models/cart_item.dart';
 import 'package:store_app/models/product_model.dart';
 import 'package:store_app/models/user_model.dart';
 
@@ -8,6 +9,7 @@ class FirestoreService {
   // Products collection
   CollectionReference get products => _firestore.collection('products');
   CollectionReference get users => _firestore.collection('users');
+  CollectionReference get orders => _firestore.collection('orders');
 
   // Get all products
   Stream<List<Product>> getProducts() {
@@ -33,6 +35,24 @@ class FirestoreService {
   // Save user data
   Future<void> saveUser(UserModel user) async {
     await users.doc(user.uid).set(user.toJson());
+  }
+
+  // Save user orders
+  Future<void> saveUserOrders(
+      String uid, List<CartItem> cartItems, int totalAmount) async {
+    await orders.doc(uid).set({
+      'userId': uid,
+      'items': cartItems
+          .map((item) => {
+                'productId': item.product.id,
+                'name': item.product.name,
+                'quantity': item.quantity,
+              })
+          .toList(),
+      'totalAmount': totalAmount,
+      'createdAt': FieldValue.serverTimestamp(),
+      'status': 'confirmed',
+    });
   }
 
   // Get user data
