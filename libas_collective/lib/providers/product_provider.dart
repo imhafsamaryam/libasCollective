@@ -34,18 +34,6 @@ class ProductProvider with ChangeNotifier {
     }
   }
 
-  Product? getProductById(String id) {
-    try {
-      return _products.firstWhere((product) => product.id == id);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  List<Product> getProductsByCategory(String category) {
-    return _products.where((product) => product.category == category).toList();
-  }
-
   void clearError() {
     _error = null;
     notifyListeners();

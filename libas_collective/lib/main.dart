@@ -41,11 +41,12 @@ void showNotification(String? title, String? body) async {
 
 Future<void> _setup() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
   Stripe.publishableKey = AppConstants.stripePublishableKey;
 }
 
 void main() async {
+  await dotenv.load(fileName: ".env");
+
   await _setup();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
