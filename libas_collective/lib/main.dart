@@ -11,6 +11,7 @@ import 'providers/product_provider.dart';
 import 'providers/cart_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -40,6 +41,7 @@ void showNotification(String? title, String? body) async {
 
 Future<void> _setup() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   Stripe.publishableKey = AppConstants.stripePublishableKey;
 }
 
