@@ -10,10 +10,12 @@ class UserModel {
   final String? photoUrl;
   final String? phoneNumber;
   final String? address;
+  final String fcmToken;
   final DateTime createdAt;
 
   UserModel({
     required this.uid,
+    required this.fcmToken,
     required this.email,
     this.displayName,
     this.photoUrl,

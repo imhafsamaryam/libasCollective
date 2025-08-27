@@ -1,10 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:store_app/main.dart';
+import 'package:store_app/models/cart_item.dart';
 import 'package:store_app/providers/cart_provider.dart';
+import 'package:store_app/services/firestore_service.dart';
+import 'package:store_app/services/stripe_service.dart';
 import 'package:store_app/widgets/cart_item_widget.dart';
 
 class CartScreen extends StatelessWidget {
-  const CartScreen({Key? key}) : super(key: key);
+  CartScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +160,8 @@ class CartScreen extends StatelessWidget {
     );
   }
 
+  final FirestoreService _firestoreService = FirestoreService();
+
   void _showCheckoutDialog(BuildContext context, CartProvider cartProvider) {
     showDialog(
       context: context,
@@ -163,16 +171,31 @@ class CartScreen extends StatelessWidget {
             'Thank you for your order! Total: \$${cartProvider.totalAmount.toStringAsFixed(2)}'),
         actions: [
           TextButton(
-            onPressed: () {
-              cartProvider.clearCart();
-              Navigator.pop(context);
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Order placed successfully!')),
-              );
+            onPressed: () async {
+              bool paymentSuccess = false;
+              try {
+                await StripeService.instance
+                    .makePayment(cartProvider.totalAmount.toInt());
+                paymentSuccess = true;
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Payment failed: ${e.toString()}')),
+                );
+              }
+
+              if (paymentSuccess) {
+                await _firestoreService.saveUserOrders(
+                    FirebaseAuth.instance.currentUser!.uid,
+                    cartProvider.cartItems,
+                    cartProvider.totalAmount.toInt());
+                print("Order saved to Firestore ${cartProvider.cartItems}");
+                Navigator.pop(context);
+                Navigator.pop(context);
+                cartProvider.clearCart();
+              }
             },
             child: const Text('Confirm'),
-          ),
+          )
         ],
       ),
     );

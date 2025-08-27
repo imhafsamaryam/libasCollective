@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:store_app/models/user_model.dart';
@@ -71,6 +72,8 @@ class AuthProvider with ChangeNotifier {
     try {
       final user =
           await _authService.registerWithEmail(email, password, displayName);
+      final token = await FirebaseMessaging.instance.getToken();
+      print("FCM Token: $token");
       if (user != null) {
         // Create user document in Firestore
         final userModel = UserModel(
@@ -78,6 +81,7 @@ class AuthProvider with ChangeNotifier {
           email: user.email!,
           displayName: displayName,
           photoUrl: user.photoURL,
+          fcmToken: token!,
           createdAt: DateTime.now(),
         );
         await _firestoreService.saveUser(userModel);
@@ -108,14 +112,16 @@ class AuthProvider with ChangeNotifier {
         try {
           await _firestoreService.getUser(user.uid);
         } catch (e) {
+          final token = await FirebaseMessaging.instance.getToken();
+          print("FCM Token: $token");
           // User doesn't exist, create new document
           final userModel = UserModel(
-            uid: user.uid,
-            email: user.email!,
-            displayName: user.displayName,
-            photoUrl: user.photoURL,
-            createdAt: DateTime.now(),
-          );
+              uid: user.uid,
+              email: user.email!,
+              displayName: user.displayName,
+              photoUrl: user.photoURL,
+              createdAt: DateTime.now(),
+              fcmToken: token!);
           await _firestoreService.saveUser(userModel);
         }
         await loadUserData(user.uid); // Load the user data after Google sign-in
